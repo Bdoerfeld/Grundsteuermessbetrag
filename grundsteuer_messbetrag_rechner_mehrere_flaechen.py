@@ -14,7 +14,7 @@ st.markdown(
 # Titel und Einleitung
 st.title("Erweiterter Grundsteuermessbetragsrechner - Grundsteuerreform ab 2025")
 st.write("""
-Dieser Rechner unterstützt die Berechnung des neuen Grundsteuermessbetrags unter Berücksichtigung der fiktiven Nettokaltmiete und des Bodenrichtwerts.
+Dieser Rechner unterstützt die Berechnung des neuen Grundsteuermessbetrags unter Berücksichtigung der fiktiven Nettokaltmiete, des Bodenrichtwerts und zusätzlicher Flächenarten.
 Die Berechnung erfolgt nach dem Ertragswertverfahren für Ein- und Zweifamilienhäuser gemäß der Anlage 39 des Bewertungsgesetzes.
 """)
 
@@ -27,12 +27,7 @@ Die Werte sind gemäß der Anlage 39 des Bewertungsgesetzes festgelegt.
 
 #### Definitionen:
 - **Wohnfläche**: Beinhaltet alle Räume, die zu Wohnzwecken genutzt werden. Dazu gehören Wohnzimmer, Schlafzimmer, Küchen, Bäder und Flure.
-  - **Dachschrägen**: 
-    - Flächen mit einer Raumhöhe von mindestens 2 Metern zählen zu 100 %.
-    - Flächen mit einer Raumhöhe zwischen 1 und 2 Metern zählen nur zu 50 %.
-    - Flächen unter 1 Meter Raumhöhe werden nicht zur Wohnfläche gezählt.
-  - **Balkone und Terrassen**: In Mecklenburg-Vorpommern werden diese Flächen in der Regel zu einem Viertel der tatsächlichen Fläche zur Wohnfläche gezählt.
-- **Garagen und sonstige Flächen**: Weitere Flächenarten wie Garagen und unbebaute Flächen werden separat erfasst und bewertet.
+- **Garagen und sonstige Flächen**: Weitere Flächenarten wie Garagen und unbebaute Flächen können separat hinzugefügt und bewertet werden.
 """)
 
 # Art des Gebäudes und Baujahr auswählen
@@ -61,20 +56,37 @@ else:  # Zweifamilienhaus
 
 st.write(f"Fiktive Nettokaltmiete für {haustyp} mit Baujahr {baujahr}: {fiktive_miete} €/m²")
 
-# Eingabe der Flächen
+# Eingabe der Wohnfläche zur Berechnung des Jahresrohertrags für die Wohnfläche
 wohnflaeche = st.number_input("Wohnfläche (m²)", min_value=0.0, step=1.0)
-garagenflaeche = st.number_input("Garagenfläche (m²)", min_value=0.0, step=1.0)
-unbebaute_flaeche = st.number_input("Unbebaute Fläche (m²)", min_value=0.0, step=1.0)
-sonstige_flaeche = st.number_input("Sonstige Fläche (m²)", min_value=0.0, step=1.0)
-
-# Berechnung der Jahresroherträge
 jahresrohertrag_wohn = wohnflaeche * fiktive_miete * 12
-jahresrohertrag_garage = garagenflaeche * 2.5 * 12  # Beispielwert €/m² für Garagenfläche
-jahresrohertrag_sonstige = sonstige_flaeche * 1.5 * 12  # Beispielwert €/m² für sonstige Flächen
+st.write(f"Berechneter Jahresrohertrag der Wohnfläche: {jahresrohertrag_wohn:.2f} Euro")
 
-# Gesamt-Jahresrohertrag berechnen
-jahresrohertrag_gesamt = jahresrohertrag_wohn + jahresrohertrag_garage + jahresrohertrag_sonstige
-st.write(f"Berechneter Jahresrohertrag (inkl. aller Flächen): {jahresrohertrag_gesamt:.2f} Euro")
+# Zusätzliche Flächenarten hinzufügen
+st.subheader("Zusätzliche Flächenarten hinzufügen")
+anzahl_flaechen = st.number_input("Anzahl der verschiedenen zusätzlichen Flächenarten auf dem Grundstück", min_value=1, step=1)
+
+# Gesamtertrag und -fläche initialisieren
+gesamt_jahresrohertrag = jahresrohertrag_wohn
+gesamt_grundflaeche = wohnflaeche
+
+for i in range(int(anzahl_flaechen)):
+    st.markdown(f"#### Fläche {i + 1}")
+    flaechenart = st.selectbox(f"Art der Fläche {i + 1}", ["Garagenfläche", "Unbebaute Fläche", "Sonstige Fläche"], key=f"flaechenart_{i}")
+    flaeche = st.number_input(f"Fläche {i + 1} (m²)", min_value=0.0, step=1.0, key=f"flaeche_{i}")
+    if flaechenart == "Garagenfläche":
+        ertragswert = 2.5  # Beispielwert €/m² für Garagenfläche
+    elif flaechenart == "Unbebaute Fläche":
+        ertragswert = 1.0  # Beispielwert €/m² für unbebaute Fläche
+    else:
+        ertragswert = 1.5  # Beispielwert €/m² für sonstige Flächen
+    
+    # Berechnung des Rohertrags für die aktuelle Fläche
+    jahresrohertrag_flaeche = flaeche * ertragswert * 12
+    gesamt_jahresrohertrag += jahresrohertrag_flaeche
+    gesamt_grundflaeche += flaeche
+    
+    # Ausgabe des Rohertrags für die aktuelle Fläche
+    st.write(f"Jahresrohertrag für {flaechenart} ({flaeche:.2f} m²): {jahresrohertrag_flaeche:.2f} Euro")
 
 # Button zur Bodenrichtwertseite
 st.markdown(
@@ -89,13 +101,12 @@ st.markdown(
 
 # Eingabe des Bodenrichtwerts und Grundstücksfläche
 bodenrichtwert = st.number_input("Bodenrichtwert (Euro/m²) nach Ermittlung auf der verlinkten Seite", min_value=0.0, step=1.0)
-grundstuecksflaeche = st.number_input("Grundstücksfläche (m²)", min_value=0.0, step=1.0)
-bodenwert = grundstuecksflaeche * bodenrichtwert
+bodenwert = gesamt_grundflaeche * bodenrichtwert
 
 # Berechnung des Grundsteuerwerts
 st.subheader("Berechnung des Grundsteuerwerts")
-grundsteuerwert = jahresrohertrag_gesamt + bodenwert
-st.write(f"Grundsteuerwert des Grundstücks: {grundsteuerwert:.2f} Euro")
+grundsteuerwert = gesamt_jahresrohertrag + bodenwert
+st.write(f"Grundsteuerwert des gesamten Grundstücks: {grundsteuerwert:.2f} Euro")
 
 # Berechnung des Grundsteuermessbetrags
 st.subheader("Berechnung des Grundsteuermessbetrags")
