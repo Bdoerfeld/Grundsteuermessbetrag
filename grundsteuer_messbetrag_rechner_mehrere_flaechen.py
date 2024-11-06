@@ -12,18 +12,20 @@ st.markdown(
 )
 
 # Titel und Einleitung
-st.title("Grundsteuermessbetragsrechner - Grundsteuerreform ab 2025")
+st.title("Erweiterter Grundsteuermessbetragsrechner - Grundsteuerreform ab 2025")
 st.write("""
-Ab 2025 wird die Grundsteuer in Deutschland nach neuen Berechnungsregeln erhoben. 
-Mit diesem Rechner können Sie den neuen Grundsteuermessbetrag für verschiedene Flächenarten auf Ihrem Grundstück berechnen.
-Bitte beachten Sie, dass diese Berechnung nur für die Ermittlung des Grundsteuermessbetrags für Grundstücke in Mecklenburg-Vorpommern geeignet ist.
+Dieser Rechner unterstützt die Berechnung des neuen Grundsteuermessbetrags unter Berücksichtigung verschiedener Flächenarten und Gebäudezustände. 
+**Hinweis**: Diese Berechnung ist nur für Grundstücke in Mecklenburg-Vorpommern geeignet.
 
-Sie benötigen die Fläche und den Bodenrichtwert für jede Art von Fläche:
+Benötigte Informationen:
+- **Wohnfläche, Garagenfläche und andere Flächenarten**: Geben Sie die Flächen und die Bodenrichtwerte für jede Art von Fläche an.
+- **Renovierungsjahr oder Baujahr**: Wenn das Gebäude renoviert wurde, kann dies den Grundsteuerwert beeinflussen.
+- **Steuermesszahlen**:
+  - Wohngrundstücke: 0,31 Promille
+  - Unbebaute Grundstücke: 0,34 Promille
+  - Garagen können in einigen Fällen eigene Werte haben.
 
-- **Wohngrundstücke**: 0,31 Promille Steuermesszahl
-- **Unbebaute Grundstücke**: 0,34 Promille Steuermesszahl
-
-Bitte wenden Sie sich bei Fragen an [kontakt@fdp-wismar.de](mailto:kontakt@fdp-wismar.de).
+Falls Fragen bestehen, wenden Sie sich an [kontakt@fdp-wismar.de](mailto:kontakt@fdp-wismar.de).
 """)
 
 # Initialisierung der Variablen für den gesamten Grundsteuerwert und Grundsteuermessbetrag
@@ -34,18 +36,32 @@ gesamt_grundsteuermessbetrag = 0
 st.subheader("Flächen auf dem Grundstück hinzufügen")
 anzahl_flaechen = st.number_input("Anzahl der verschiedenen Flächenarten auf dem Grundstück", min_value=1, step=1)
 
-# Schleife zur Eingabe der Daten für jede Flächenart
+# Eingabe der Daten für jede Flächenart
 for i in range(int(anzahl_flaechen)):
     st.markdown(f"#### Fläche {i + 1}")
-    flaechenart = st.selectbox(f"Art der Fläche {i + 1}", ["Wohngrundstück", "Unbebautes Grundstück"], key=f"flaechenart_{i}")
+    flaechenart = st.selectbox(f"Art der Fläche {i + 1}", ["Wohnfläche", "Garagenfläche", "Unbebaute Fläche", "Sonstige Fläche"], key=f"flaechenart_{i}")
     flaeche = st.number_input(f"Fläche {i + 1} (m²)", min_value=0.0, step=1.0, key=f"flaeche_{i}")
     bodenrichtwert = st.number_input(f"Bodenrichtwert {i + 1} (Euro/m²)", min_value=0.0, step=1.0, key=f"bodenrichtwert_{i}")
 
-    # Steuermesszahl je nach Flächenart festlegen
-    if flaechenart == "Wohngrundstück":
-        steuermesszahl = 0.31 / 1000  # 0,31 Promille für Wohngrundstücke
+    # Auswahl des Baujahrs/Renovierungsjahrs
+    if flaechenart == "Wohnfläche":
+        baujahr = st.selectbox(f"Baujahr oder letzte Renovierung für Fläche {i + 1}", ["Vor 1948", "1948 - 1978", "1979 oder später"], key=f"baujahr_{i}")
+        if baujahr == "Vor 1948":
+            zuschlag = 1.1  # Beispielsweise ein Zuschlag für ältere Gebäude
+        elif baujahr == "1948 - 1978":
+            zuschlag = 1.05
+        else:
+            zuschlag = 1.0  # Kein Zuschlag für neuere Gebäude
     else:
-        steuermesszahl = 0.34 / 1000  # 0,34 Promille für unbebaute Grundstücke
+        zuschlag = 1.0
+
+    # Steuermesszahl je nach Flächenart festlegen
+    if flaechenart == "Wohnfläche":
+        steuermesszahl = 0.31 / 1000 * zuschlag
+    elif flaechenart == "Garagenfläche":
+        steuermesszahl = 0.32 / 1000  # Beispiel für Garagenflächen
+    else:
+        steuermesszahl = 0.34 / 1000
 
     # Berechnung des Grundsteuerwerts und des Grundsteuermessbetrags für die aktuelle Fläche
     grundsteuerwert = flaeche * bodenrichtwert
@@ -68,6 +84,6 @@ st.write(f"Neuer Grundsteuermessbetrag für das gesamte Grundstück: {gesamt_gru
 st.subheader("Erklärung der Berechnungsschritte")
 st.write("""
 1. **Grundsteuerwert je Fläche berechnen**: Die Fläche wird mit dem Bodenrichtwert multipliziert, um den Grundsteuerwert für jede Flächenart zu erhalten.
-2. **Grundsteuermessbetrag je Fläche berechnen**: Der Grundsteuerwert wird mit der jeweiligen Steuermesszahl multipliziert, die je nach Flächenart unterschiedlich ist.
+2. **Grundsteuermessbetrag je Fläche berechnen**: Der Grundsteuerwert wird mit der jeweiligen Steuermesszahl multipliziert, die je nach Flächenart unterschiedlich ist. Zuschläge können für bestimmte Gebäudejahre oder Renovierungen gelten.
 3. **Gesamtergebnis**: Die Grundsteuerwerte und Grundsteuermessbeträge aller Flächenarten werden addiert, um den Gesamtbetrag zu erhalten.
 """)
