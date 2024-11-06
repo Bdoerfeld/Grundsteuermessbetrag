@@ -18,8 +18,8 @@ Dieser Rechner unterstützt die Berechnung des neuen Grundsteuermessbetrags unte
 **Hinweis**: Diese Berechnung ist nur für Grundstücke in Mecklenburg-Vorpommern geeignet.
 
 Benötigte Informationen:
-- **Wohnfläche, Garagenfläche und andere Flächenarten**: Geben Sie die Flächen und die Bodenrichtwerte für jede Art von Fläche an.
-- **Renovierungsjahr oder Baujahr**: Wenn das Gebäude renoviert wurde, kann dies den Grundsteuerwert beeinflussen.
+- **Wohnfläche, Garagenfläche und andere Flächenarten**: Geben Sie die Flächen für jede Art von Fläche an.
+- **Bodenrichtwert**: Sie können den Bodenrichtwert für Ihr Grundstück ermitteln, indem Sie auf den Button unten klicken.
 - **Steuermesszahlen**:
   - Wohngrundstücke: 0,31 Promille
   - Unbebaute Grundstücke: 0,34 Promille
@@ -36,12 +36,24 @@ gesamt_grundsteuermessbetrag = 0
 st.subheader("Flächen auf dem Grundstück hinzufügen")
 anzahl_flaechen = st.number_input("Anzahl der verschiedenen Flächenarten auf dem Grundstück", min_value=1, step=1)
 
-# Eingabe der Daten für jede Flächenart
+# Schleife zur Eingabe der Daten für jede Flächenart
 for i in range(int(anzahl_flaechen)):
     st.markdown(f"#### Fläche {i + 1}")
     flaechenart = st.selectbox(f"Art der Fläche {i + 1}", ["Wohnfläche", "Garagenfläche", "Unbebaute Fläche", "Sonstige Fläche"], key=f"flaechenart_{i}")
     flaeche = st.number_input(f"Fläche {i + 1} (m²)", min_value=0.0, step=1.0, key=f"flaeche_{i}")
-    bodenrichtwert = st.number_input(f"Bodenrichtwert {i + 1} (Euro/m²)", min_value=0.0, step=1.0, key=f"bodenrichtwert_{i}")
+    
+    # Link zur Bodenrichtwertseite
+    st.markdown(
+        f"""
+        <a href="https://www.geoport-nwm.de/de/bodenrichtwertkarte-bauland-nwm.html" target="_blank">
+        <button style="background-color: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">
+        Hier können Sie den Bodenrichtwert für Ihr Grundstück ermitteln
+        </button></a>
+        """,
+        unsafe_allow_html=True
+    )
+
+    bodenrichtwert = st.number_input(f"Bodenrichtwert {i + 1} (Euro/m²) nach Ermittlung auf der verlinkten Seite", min_value=0.0, step=1.0, key=f"bodenrichtwert_{i}")
 
     # Auswahl des Baujahrs/Renovierungsjahrs
     if flaechenart == "Wohnfläche":
