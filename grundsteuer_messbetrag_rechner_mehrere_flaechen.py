@@ -47,7 +47,7 @@ for i in range(int(anzahl_flaechen)):
         f"""
         <a href="https://www.geoport-nwm.de/de/bodenrichtwertkarte-bauland-nwm.html" target="_blank">
         <button style="background-color: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">
-        Hier können Sie den Bodenrichtwert für Ihr Grundstück ermitteln
+        Hier können Sie den Bodenrichtwert für Ihr Grundstück ermitteln - nur NWM
         </button></a>
         """,
         unsafe_allow_html=True
