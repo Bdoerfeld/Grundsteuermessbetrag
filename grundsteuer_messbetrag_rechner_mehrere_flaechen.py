@@ -18,7 +18,7 @@ Dieser Rechner unterstützt die Berechnung des neuen Grundsteuermessbetrags unte
 **Hinweis**: Diese Berechnung ist nur für Grundstücke in Mecklenburg-Vorpommern geeignet.
 
 Benötigte Informationen:
-- **Wohnfläche, Garagenfläche und andere Flächenarten**: Geben Sie die Flächen für jede Art von Fläche an.
+- **Wohnfläche, Garagenfläche, Nutzfläche und andere Flächenarten**: Geben Sie die Flächen für jede Art von Fläche an.
 - **Bodenrichtwert**: Sie können den Bodenrichtwert für Ihr Grundstück ermitteln, indem Sie auf den Button unten klicken (nur gültig für den Kreis Nordwestmecklenburg).
 - **Steuermesszahlen**:
   - Wohngrundstücke: 0,31 Promille
@@ -28,13 +28,25 @@ Benötigte Informationen:
 Falls Fragen bestehen, wenden Sie sich an [kontakt@fdp-wismar.de](mailto:kontakt@fdp-wismar.de).
 """)
 
-# Erklärung zu den verschiedenen Flächenarten
-st.subheader("Erläuterungen zu den verschiedenen Flächenarten")
-st.write("""
-- **Wohnfläche**: Flächen, die hauptsächlich für Wohnzwecke genutzt werden, wie Wohnräume, Schlafzimmer, Küchen und Badezimmer. Dazu gehören auch Flure und Treppenhäuser innerhalb der Wohneinheit.
-- **Garagenfläche**: Flächen, die für das Abstellen von Fahrzeugen bestimmt sind. Garagenflächen umfassen geschlossene Garagen sowie Carports oder Stellplätze, die fest auf dem Grundstück verankert sind.
-- **Unbebaute Fläche**: Teile des Grundstücks, die nicht bebaut sind und keine fest installierten Gebäude oder Anlagen enthalten. Dazu zählen Gärten, Wiesen und nicht überbaute Flächen.
-- **Sonstige Fläche**: Flächen, die nicht eindeutig in eine der oben genannten Kategorien fallen, wie z. B. Keller, Abstellräume außerhalb der Wohnfläche, Werkstätten oder gewerbliche Bereiche.
+# Infobox zur Wohnflächenverordnung und Nutzflächen
+st.info("""
+**Wichtige Informationen zur Wohnflächenverordnung (WoFlV):**
+
+Die Wohnflächenverordnung (WoFlV) regelt, welche Flächen zur Wohnfläche zählen und wie sie zu berechnen sind. Zur Wohnfläche zählen alle Räume, die ausschließlich zu Wohnzwecken genutzt werden, wie:
+
+- **Wohnräume** (z. B. Wohnzimmer, Schlafzimmer, Küche, Bad und Flur) zählen vollständig zur Wohnfläche.
+- **Wintergärten** zählen vollständig, wenn sie beheizbar und geschlossen sind.
+- **Balkone, Loggien und Terrassen**: Diese werden in Mecklenburg-Vorpommern in der Regel zu einem Viertel ihrer Grundfläche zur Wohnfläche hinzugerechnet.
+
+**Besonderheiten bei Dachschrägen:**
+- Flächen mit einer Raumhöhe von mindestens 2 Metern werden zu 100 % angerechnet.
+- Flächen zwischen 1 und 2 Metern Höhe werden zu 50 % angerechnet.
+- Flächen unter 1 Meter Raumhöhe bleiben unberücksichtigt.
+
+**Nutzfläche und Freizeitflächen:**
+- **Nutzflächen** dienen betrieblichen, öffentlichen oder sonstigen Zwecken und werden in der Grundsteuererklärung separat angegeben.
+- **Freizeitflächen** wie Hobbyräume oder Partykeller zählen in der Regel nicht zur Wohnfläche, können aber als Nutzfläche deklariert werden, wenn sie nicht zu Wohnzwecken genutzt werden.
+- Weitere Details finden Sie auf der [Buhl-Ratgeberseite zur Wohnfläche](https://www.buhl.de/steuer/ratgeber/wohnflaeche-grundsteuer/).
 """)
 
 # Initialisierung der Variablen für den gesamten Grundsteuerwert und Grundsteuermessbetrag
@@ -48,7 +60,7 @@ anzahl_flaechen = st.number_input("Anzahl der verschiedenen Flächenarten auf de
 # Schleife zur Eingabe der Daten für jede Flächenart
 for i in range(int(anzahl_flaechen)):
     st.markdown(f"#### Fläche {i + 1}")
-    flaechenart = st.selectbox(f"Art der Fläche {i + 1}", ["Wohnfläche", "Garagenfläche", "Unbebaute Fläche", "Sonstige Fläche"], key=f"flaechenart_{i}")
+    flaechenart = st.selectbox(f"Art der Fläche {i + 1}", ["Wohnfläche", "Garagenfläche", "Unbebaute Fläche", "Nutzfläche", "Sonstige Fläche"], key=f"flaechenart_{i}")
     flaeche = st.number_input(f"Fläche {i + 1} (m²)", min_value=0.0, step=1.0, key=f"flaeche_{i}")
     
     # Button zur Bodenrichtwertseite
@@ -81,8 +93,10 @@ for i in range(int(anzahl_flaechen)):
         steuermesszahl = 0.31 / 1000 * zuschlag
     elif flaechenart == "Garagenfläche":
         steuermesszahl = 0.32 / 1000  # Beispiel für Garagenflächen
+    elif flaechenart == "Nutzfläche":
+        steuermesszahl = 0.34 / 1000  # Beispiel für Nutzflächen
     else:
-        steuermesszahl = 0.34 / 1000
+        steuermesszahl = 0.34 / 1000  # Standard für unbebaute und sonstige Flächen
 
     # Berechnung des Grundsteuerwerts und des Grundsteuermessbetrags für die aktuelle Fläche
     grundsteuerwert = flaeche * bodenrichtwert
@@ -107,4 +121,11 @@ st.write("""
 1. **Grundsteuerwert je Fläche berechnen**: Die Fläche wird mit dem Bodenrichtwert multipliziert, um den Grundsteuerwert für jede Flächenart zu erhalten.
 2. **Grundsteuermessbetrag je Fläche berechnen**: Der Grundsteuerwert wird mit der jeweiligen Steuermesszahl multipliziert, die je nach Flächenart unterschiedlich ist. Zuschläge können für bestimmte Gebäudejahre oder Renovierungen gelten.
 3. **Gesamtergebnis**: Die Grundsteuerwerte und Grundsteuermessbeträge aller Flächenarten werden addiert, um den Gesamtbetrag zu erhalten.
+""")
+
+# Zusatz zur Orientierung
+st.write("""
+**Hinweis**: Diese Berechnung dient ausschließlich der Orientierung und stellt keine verbindliche Berechnung dar. 
+Für eine exakte Ermittlung Ihrer Grundsteuer wenden Sie sich bitte an einen Steuerberater oder die zuständige Behörde. 
+Es wird keine Haftung für die Richtigkeit der Ergebnisse übernommen.
 """)
