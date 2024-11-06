@@ -12,20 +12,29 @@ st.markdown(
 )
 
 # Titel und Einleitung
-st.title("Berechnung Grundsteuermessbetrag - ab 2025")
+st.title("Erweiterter Grundsteuermessbetragsrechner - Grundsteuerreform ab 2025")
 st.write("""
-Dieser Rechner unterstützt die Berechnung des neuen Grundsteuermessbetrags. 
+Dieser Rechner unterstützt die Berechnung des neuen Grundsteuermessbetrags unter Berücksichtigung verschiedener Flächenarten und Gebäudezustände. 
 **Hinweis**: Diese Berechnung ist nur für Grundstücke in Mecklenburg-Vorpommern geeignet.
 
 Benötigte Informationen:
 - **Wohnfläche, Garagenfläche und andere Flächenarten**: Geben Sie die Flächen für jede Art von Fläche an.
-- **Bodenrichtwert**: Sie können den Bodenrichtwert für Ihr Grundstück ermitteln, indem Sie auf den Button unten klicken.
+- **Bodenrichtwert**: Sie können den Bodenrichtwert für Ihr Grundstück ermitteln, indem Sie auf den Button unten klicken (nur gültig für den Kreis Nordwestmecklenburg).
 - **Steuermesszahlen**:
   - Wohngrundstücke: 0,31 Promille
   - Unbebaute Grundstücke: 0,34 Promille
   - Garagen können in einigen Fällen eigene Werte haben.
 
 Falls Fragen bestehen, wenden Sie sich an [kontakt@fdp-wismar.de](mailto:kontakt@fdp-wismar.de).
+""")
+
+# Erklärung zu den verschiedenen Flächenarten
+st.subheader("Erläuterungen zu den verschiedenen Flächenarten")
+st.write("""
+- **Wohnfläche**: Flächen, die hauptsächlich für Wohnzwecke genutzt werden, wie Wohnräume, Schlafzimmer, Küchen und Badezimmer. Dazu gehören auch Flure und Treppenhäuser innerhalb der Wohneinheit.
+- **Garagenfläche**: Flächen, die für das Abstellen von Fahrzeugen bestimmt sind. Garagenflächen umfassen geschlossene Garagen sowie Carports oder Stellplätze, die fest auf dem Grundstück verankert sind.
+- **Unbebaute Fläche**: Teile des Grundstücks, die nicht bebaut sind und keine fest installierten Gebäude oder Anlagen enthalten. Dazu zählen Gärten, Wiesen und nicht überbaute Flächen.
+- **Sonstige Fläche**: Flächen, die nicht eindeutig in eine der oben genannten Kategorien fallen, wie z. B. Keller, Abstellräume außerhalb der Wohnfläche, Werkstätten oder gewerbliche Bereiche.
 """)
 
 # Initialisierung der Variablen für den gesamten Grundsteuerwert und Grundsteuermessbetrag
@@ -42,12 +51,12 @@ for i in range(int(anzahl_flaechen)):
     flaechenart = st.selectbox(f"Art der Fläche {i + 1}", ["Wohnfläche", "Garagenfläche", "Unbebaute Fläche", "Sonstige Fläche"], key=f"flaechenart_{i}")
     flaeche = st.number_input(f"Fläche {i + 1} (m²)", min_value=0.0, step=1.0, key=f"flaeche_{i}")
     
-    # Link zur Bodenrichtwertseite
+    # Button zur Bodenrichtwertseite
     st.markdown(
         f"""
         <a href="https://www.geoport-nwm.de/de/bodenrichtwertkarte-bauland-nwm.html" target="_blank">
         <button style="background-color: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">
-        Hier können Sie den Bodenrichtwert für Ihr Grundstück ermitteln - nur NWM
+        Hier können Sie den Bodenrichtwert für Ihr Grundstück ermitteln (nur für den Kreis Nordwestmecklenburg)
         </button></a>
         """,
         unsafe_allow_html=True
