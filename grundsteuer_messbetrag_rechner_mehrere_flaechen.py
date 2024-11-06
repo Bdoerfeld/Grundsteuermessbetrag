@@ -12,7 +12,7 @@ st.markdown(
 )
 
 # Titel und Einleitung
-st.title("Erweiterter Grundsteuermessbetragsrechner - Grundsteuerreform ab 2025")
+st.title("Berechnung Grundsteuermessbetrag - ab 2025")
 st.write("""
 Dieser Rechner unterstützt die Berechnung des neuen Grundsteuermessbetrags unter Berücksichtigung verschiedener Flächenarten und Gebäudezustände. 
 **Hinweis**: Diese Berechnung ist nur für Grundstücke in Mecklenburg-Vorpommern geeignet.
