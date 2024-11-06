@@ -12,120 +12,55 @@ st.markdown(
 )
 
 # Titel und Einleitung
-st.title("Berechnung Grundsteuermessbetrag - ab 2025")
+st.title("Erweiterter Grundsteuermessbetragsrechner - Grundsteuerreform ab 2025")
 st.write("""
-Dieser Rechner unterstützt die Berechnung des neuen Grundsteuermessbetrags unter Berücksichtigung verschiedener Flächenarten und Gebäudezustände. 
+Dieser Rechner unterstützt die Berechnung des neuen Grundsteuermessbetrags unter Berücksichtigung der Verfahren zur Bewertung des Einheitswerts.
 **Hinweis**: Diese Berechnung ist nur für Grundstücke in Mecklenburg-Vorpommern geeignet.
+Die Berechnung erfolgt je nach Immobilienart im Ertragswertverfahren oder Sachwertverfahren.
 
 Benötigte Informationen:
-- **Wohnfläche, Garagenfläche, Nutzfläche und andere Flächenarten**: Geben Sie die Flächen für jede Art von Fläche an.
+- **Art der Immobilie**: Auswahl des Bewertungsverfahrens (Ertragswert- oder Sachwertverfahren).
+- **Wohnfläche, Garagenfläche und andere Flächenarten**: Geben Sie die Flächen für jede Art von Fläche an.
 - **Bodenrichtwert**: Sie können den Bodenrichtwert für Ihr Grundstück ermitteln, indem Sie auf den Button unten klicken (nur gültig für den Kreis Nordwestmecklenburg).
-- **Steuermesszahlen**:
-  - Wohngrundstücke: 0,31 Promille
-  - Unbebaute Grundstücke: 0,34 Promille
-  - Garagen können in einigen Fällen eigene Werte haben.
-
-Falls Fragen bestehen, wenden Sie sich an [kontakt@fdp-wismar.de](mailto:kontakt@fdp-wismar.de).
 """)
 
-# Infobox zur Wohnflächenverordnung und Nutzflächen
-st.info("""
-**Wichtige Informationen zur Wohnflächenverordnung (WoFlV):**
+# Art der Immobilie auswählen
+immobilien_art = st.selectbox("Wählen Sie die Art Ihrer Immobilie", ["Wohngebäude (eigengenutzt)", "Miet- oder Gewerbeimmobilie"])
 
-Die Wohnflächenverordnung (WoFlV) regelt, welche Flächen zur Wohnfläche zählen und wie sie zu berechnen sind. Zur Wohnfläche zählen alle Räume, die ausschließlich zu Wohnzwecken genutzt werden, wie:
-
-- **Wohnräume** (z. B. Wohnzimmer, Schlafzimmer, Küche, Bad und Flur) zählen vollständig zur Wohnfläche.
-- **Wintergärten** zählen vollständig, wenn sie beheizbar und geschlossen sind.
-- **Balkone, Loggien und Terrassen**: Diese werden in Mecklenburg-Vorpommern in der Regel zu einem Viertel ihrer Grundfläche zur Wohnfläche hinzugerechnet.
-
-**Besonderheiten bei Dachschrägen:**
-- Flächen mit einer Raumhöhe von mindestens 2 Metern werden zu 100 % angerechnet.
-- Flächen zwischen 1 und 2 Metern Höhe werden zu 50 % angerechnet.
-- Flächen unter 1 Meter Raumhöhe bleiben unberücksichtigt.
-
-**Nutzfläche und Freizeitflächen:**
-- **Nutzflächen** dienen betrieblichen, öffentlichen oder sonstigen Zwecken und werden in der Grundsteuererklärung separat angegeben.
-- **Freizeitflächen** wie Hobbyräume oder Partykeller zählen in der Regel nicht zur Wohnfläche, können aber als Nutzfläche deklariert werden, wenn sie nicht zu Wohnzwecken genutzt werden.
-- Weitere Details finden Sie auf der [Buhl-Ratgeberseite zur Wohnfläche](https://www.buhl.de/steuer/ratgeber/wohnflaeche-grundsteuer/).
-""")
-
-# Initialisierung der Variablen für den gesamten Grundsteuerwert und Grundsteuermessbetrag
-gesamt_grundsteuerwert = 0
-gesamt_grundsteuermessbetrag = 0
-
-# Anzahl der Flächenarten, die hinzugefügt werden sollen
-st.subheader("Flächen auf dem Grundstück hinzufügen")
-anzahl_flaechen = st.number_input("Anzahl der verschiedenen Flächenarten auf dem Grundstück", min_value=1, step=1)
-
-# Schleife zur Eingabe der Daten für jede Flächenart
-for i in range(int(anzahl_flaechen)):
-    st.markdown(f"#### Fläche {i + 1}")
-    flaechenart = st.selectbox(f"Art der Fläche {i + 1}", ["Wohnfläche", "Garagenfläche", "Unbebaute Fläche", "Nutzfläche", "Sonstige Fläche"], key=f"flaechenart_{i}")
-    flaeche = st.number_input(f"Fläche {i + 1} (m²)", min_value=0.0, step=1.0, key=f"flaeche_{i}")
+# Bewertungsverfahren basierend auf der Immobilienart
+if immobilien_art == "Miet- oder Gewerbeimmobilie":
+    st.subheader("Berechnung nach dem Ertragswertverfahren")
+    jahresrohertrag = st.number_input("Jahresrohertrag (Euro)", min_value=0.0, step=1.0)
+    bewirtschaftungskosten = st.number_input("Bewirtschaftungskosten (Euro)", min_value=0.0, step=1.0)
+    liegenschaftszinssatz = st.number_input("Liegenschaftszinssatz (%)", min_value=0.0, max_value=100.0, step=0.1)
     
-    # Button zur Bodenrichtwertseite
-    st.markdown(
-        f"""
-        <a href="https://www.geoport-nwm.de/de/bodenrichtwertkarte-bauland-nwm.html" target="_blank">
-        <button style="background-color: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">
-        Hier können Sie den Bodenrichtwert für Ihr Grundstück ermitteln (nur für den Kreis Nordwestmecklenburg)
-        </button></a>
-        """,
-        unsafe_allow_html=True
-    )
+    # Ertragswertberechnung
+    reinertrag = jahresrohertrag - bewirtschaftungskosten
+    kapitalwert = reinertrag / (liegenschaftszinssatz / 100)
+    st.write(f"Kapitalwert der Immobilie: {kapitalwert:.2f} Euro")
+else:
+    st.subheader("Berechnung nach dem Sachwertverfahren")
+    herstellungskosten = st.number_input("Herstellungskosten des Gebäudes (Euro)", min_value=0.0, step=1.0)
+    wertminderung = st.number_input("Wertminderung des Gebäudes (in Prozent)", min_value=0.0, max_value=100.0, step=0.1)
+    bodenwert = st.number_input("Bodenwert des Grundstücks (Euro)", min_value=0.0, step=1.0)
 
-    bodenrichtwert = st.number_input(f"Bodenrichtwert {i + 1} (Euro/m²) nach Ermittlung auf der verlinkten Seite", min_value=0.0, step=1.0, key=f"bodenrichtwert_{i}")
+    # Sachwertberechnung
+    gebaeudewert = herstellungskosten * (1 - wertminderung / 100)
+    sachwert = gebaeudewert + bodenwert
+    st.write(f"Sachwert der Immobilie: {sachwert:.2f} Euro")
 
-    # Auswahl des Baujahrs/Renovierungsjahrs
-    if flaechenart == "Wohnfläche":
-        baujahr = st.selectbox(f"Baujahr oder letzte Renovierung für Fläche {i + 1}", ["Vor 1948", "1948 - 1978", "1979 oder später"], key=f"baujahr_{i}")
-        if baujahr == "Vor 1948":
-            zuschlag = 1.1  # Beispielsweise ein Zuschlag für ältere Gebäude
-        elif baujahr == "1948 - 1978":
-            zuschlag = 1.05
-        else:
-            zuschlag = 1.0  # Kein Zuschlag für neuere Gebäude
-    else:
-        zuschlag = 1.0
+# Berechnung des Grundsteuermessbetrags
+st.subheader("Berechnung des Grundsteuermessbetrags")
+if immobilien_art == "Miet- oder Gewerbeimmobilie":
+    grundsteuermessbetrag = kapitalwert * 0.0031  # Beispiel für den Steuermesssatz, je nach Region variabel
+else:
+    grundsteuermessbetrag = sachwert * 0.0034  # Beispiel für den Steuermesssatz, je nach Region variabel
 
-    # Steuermesszahl je nach Flächenart festlegen
-    if flaechenart == "Wohnfläche":
-        steuermesszahl = 0.31 / 1000 * zuschlag
-    elif flaechenart == "Garagenfläche":
-        steuermesszahl = 0.32 / 1000  # Beispiel für Garagenflächen
-    elif flaechenart == "Nutzfläche":
-        steuermesszahl = 0.34 / 1000  # Beispiel für Nutzflächen
-    else:
-        steuermesszahl = 0.34 / 1000  # Standard für unbebaute und sonstige Flächen
+st.write(f"Neuer Grundsteuermessbetrag für das gesamte Grundstück: {grundsteuermessbetrag:.2f} Euro")
 
-    # Berechnung des Grundsteuerwerts und des Grundsteuermessbetrags für die aktuelle Fläche
-    grundsteuerwert = flaeche * bodenrichtwert
-    grundsteuermessbetrag = grundsteuerwert * steuermesszahl
-
-    # Hinzufügen zum Gesamtwert
-    gesamt_grundsteuerwert += grundsteuerwert
-    gesamt_grundsteuermessbetrag += grundsteuermessbetrag
-
-    # Anzeige der Ergebnisse für die aktuelle Fläche
-    st.write(f"Grundsteuerwert für Fläche {i + 1}: {grundsteuerwert:.2f} Euro")
-    st.write(f"Grundsteuermessbetrag für Fläche {i + 1}: {grundsteuermessbetrag:.2f} Euro")
-
-# Gesamtergebnisse anzeigen
-st.subheader("Gesamtergebnisse")
-st.write(f"Gesamter Grundsteuerwert für das Grundstück: {gesamt_grundsteuerwert:.2f} Euro")
-st.write(f"Neuer Grundsteuermessbetrag für das gesamte Grundstück: {gesamt_grundsteuermessbetrag:.2f} Euro")
-
-# Erklärung der Berechnungsschritte
-st.subheader("Erklärung der Berechnungsschritte")
+# Hinweis zur Orientierung
+st.subheader("Hinweis zur Orientierung")
 st.write("""
-1. **Grundsteuerwert je Fläche berechnen**: Die Fläche wird mit dem Bodenrichtwert multipliziert, um den Grundsteuerwert für jede Flächenart zu erhalten.
-2. **Grundsteuermessbetrag je Fläche berechnen**: Der Grundsteuerwert wird mit der jeweiligen Steuermesszahl multipliziert, die je nach Flächenart unterschiedlich ist. Zuschläge können für bestimmte Gebäudejahre oder Renovierungen gelten.
-3. **Gesamtergebnis**: Die Grundsteuerwerte und Grundsteuermessbeträge aller Flächenarten werden addiert, um den Gesamtbetrag zu erhalten.
-""")
-
-# Zusatz zur Orientierung
-st.write("""
-**Hinweis**: Diese Berechnung dient ausschließlich der Orientierung und stellt keine verbindliche Berechnung dar. 
-Für eine exakte Ermittlung Ihrer Grundsteuer wenden Sie sich bitte an einen Steuerberater oder die zuständige Behörde. 
-Es wird keine Haftung für die Richtigkeit der Ergebnisse übernommen.
+Die hier dargestellte Berechnung dient ausschließlich der Orientierung und stellt keine Garantie auf Richtigkeit dar. 
+Für eine genaue Berechnung wird empfohlen, die Bauunterlagen zu konsultieren oder sich an einen Fachmann zu wenden.
 """)
